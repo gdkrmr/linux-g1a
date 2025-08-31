@@ -4,8 +4,8 @@
 # Based on the linux package by:
 # Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
 
-pkgbase=linux-mainline
-#pkgbase=linux-custom       # Build kernel with a different name
+#pkgbase=linux-mainline
+pkgbase=linux-g1a       # Build kernel with a different name
 _tag=v6.17-rc3
 pkgver=6.17rc3
 pkgrel=1
@@ -43,6 +43,12 @@ _srcname=linux-mainline
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=$_tag"
   config         # the main kernel config file
+  "990-amd-isp-capture.patch"
+  "991-amd-ll-isp4.patch"
+  "992-isp4-fw-hw-interface.patch"
+  "993-isp4-firmware-loading.patch"
+  "994-isp4-video-node.patch"
+  "995-isp4-debug.patch"
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
@@ -50,7 +56,13 @@ validpgpkeys=(
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
 )
 sha256sums=('5b50e77aa2969cf14db765a562fae6501324b8bc200e70e758d92ca0daedae83'
-            '748eb134d6449f7666e4c239b8b3604f6d860dbdcef955e3267dbd98cad6d668')
+            'f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072'
+            '873bd57526dc602cd7357bc8b629ece229ce2f8e2e90c8520e0c3a3de6b50e5c'
+            '0cf06d2e48ee41d8d3de07cbf7a82c22cdbe8edeb2e8e6764d682fdc343cbbb0'
+            'f66216db7350e2a3a99751d9ec91121d9883a82352658d50c1b0255b42395cdb'
+            '553458c8240385f07788258da74e30f0d5fb7539c97a5da60dbc41056190e789'
+            'f8afbdb8844c968e7cc44c88066c9f34374a6033ce4d3c47ed6696a12ee5555a'
+            '110a64c8d583bbe82158a79b9843604700a333cb41e291ee5f89ac9949dae48a')
 
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase
