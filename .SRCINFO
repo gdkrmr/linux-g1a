@@ -1,6 +1,6 @@
 pkgbase = linux-g1a
 	pkgdesc = Linux Mainline
-	pkgver = 6.17rc3
+	pkgver = 6.17rc4
 	pkgrel = 1
 	url = https://kernel.org/
 	arch = x86_64
@@ -25,7 +25,7 @@ pkgbase = linux-g1a
 	makedepends = texlive-latexextra
 	options = !debug
 	options = !strip
-	source = linux-mainline::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=v6.17-rc3
+	source = linux-mainline::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=v6.17-rc4
 	source = config
 	source = 990-amd-isp-capture.patch
 	source = 991-amd-ll-isp4.patch
@@ -36,14 +36,14 @@ pkgbase = linux-g1a
 	validpgpkeys = ABAF11C65A2970B130ABE3C479BE3E4300411886
 	validpgpkeys = 647F28654894E3BD457199BE38DBBDC86092693E
 	validpgpkeys = 83BC8889351B5DEBBB68416EB8AC08600F108CDF
-	sha256sums = 5b50e77aa2969cf14db765a562fae6501324b8bc200e70e758d92ca0daedae83
+	sha256sums = 2d1e30d4e9da305ea582dfb6321897d6140481697548e690a73ce49dad9fccb8
 	sha256sums = f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072
-	sha256sums = 0b8369ba7fc2f07591314f27e6df34f083577b4a91a861231b6ccff00b8520e3
-	sha256sums = a273ec5416a6035d31c0ca5252611015847e63c2c818a74b7fe5d7d798ce94cd
-	sha256sums = 45876347dc978e90bacee4915bac19f0e4f7ffc898ee943bc8431e9c33ef7898
-	sha256sums = fe2f9e87f2134e8246943d043548687146b0f95efe1877949478c5ba4d5e4936
-	sha256sums = 7c2a8c8a93db48f3ccbc65cf4dc3fa0fb5f0720d85e07028bfaae5e32a29b0a1
-	sha256sums = 697e88db32adee86443c8998f3a2ed193eb040a813283684552dbbdcb2666029
+	sha256sums = 873bd57526dc602cd7357bc8b629ece229ce2f8e2e90c8520e0c3a3de6b50e5c
+	sha256sums = 0cf06d2e48ee41d8d3de07cbf7a82c22cdbe8edeb2e8e6764d682fdc343cbbb0
+	sha256sums = f66216db7350e2a3a99751d9ec91121d9883a82352658d50c1b0255b42395cdb
+	sha256sums = 553458c8240385f07788258da74e30f0d5fb7539c97a5da60dbc41056190e789
+	sha256sums = f8afbdb8844c968e7cc44c88066c9f34374a6033ce4d3c47ed6696a12ee5555a
+	sha256sums = 110a64c8d583bbe82158a79b9843604700a333cb41e291ee5f89ac9949dae48a
 
 pkgname = linux-g1a
 	pkgdesc = The Linux Mainline kernel and modules
