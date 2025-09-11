@@ -6,8 +6,8 @@
 
 #pkgbase=linux-mainline
 pkgbase=linux-g1a       # Build kernel with a different name
-_tag=v6.17-rc4
-pkgver=6.17rc4
+_tag=v6.17-rc5
+pkgver=6.17rc5
 pkgrel=1
 pkgdesc="Linux Mainline"
 arch=(x86_64)
@@ -55,7 +55,7 @@ validpgpkeys=(
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
 )
-sha256sums=('2d1e30d4e9da305ea582dfb6321897d6140481697548e690a73ce49dad9fccb8'
+sha256sums=('51cebaa6e3a81ae3b41fe35a0a4c655ed9c7a365802be5135fd8c51b3aeba218'
             'f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072'
             '873bd57526dc602cd7357bc8b629ece229ce2f8e2e90c8520e0c3a3de6b50e5c'
             '0cf06d2e48ee41d8d3de07cbf7a82c22cdbe8edeb2e8e6764d682fdc343cbbb0'
