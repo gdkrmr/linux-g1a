@@ -43,12 +43,13 @@ _srcname=linux-mainline
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=$_tag"
   config         # the main kernel config file
-  "990-amd-isp-capture.patch"
-  "991-amd-ll-isp4.patch"
-  "992-isp4-fw-hw-interface.patch"
-  "993-isp4-firmware-loading.patch"
-  "994-isp4-video-node.patch"
-  "995-isp4-debug.patch"
+  "991-amd-isp4-capture-driver.patch"
+  "992-amd-isp4-low-level-support.patch"
+  "993-amd-isp4-fw-hw-interface.patch"
+  "994-amd-isp4-subdev-fw-loading.patch"
+  "995-amd-isp4-video-node-buffer-handling.patch"
+  "996-amd-isp4-debug-fs-logging.patch"
+  "997-amd-isp4-documentation.patch"
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds

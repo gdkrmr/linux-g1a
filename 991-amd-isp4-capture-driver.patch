@@ -1,5 +1,5 @@
 diff --git a/MAINTAINERS b/MAINTAINERS
-index fe168477caa4..3ad845f1511b 100644
+index cd7ff55b5d32..3640a1e3262c 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -1133,6 +1133,19 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/iommu/linux.git
@@ -66,18 +66,19 @@ index 000000000000..8bfc1955f22e
 +obj-y += isp4/
 diff --git a/drivers/media/platform/amd/isp4/Kconfig b/drivers/media/platform/amd/isp4/Kconfig
 new file mode 100644
-index 000000000000..0268060c2dae
+index 000000000000..d4e4ad436600
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/Kconfig
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,14 @@
 +# SPDX-License-Identifier: GPL-2.0+
 +
 +config AMD_ISP4
 +	tristate "AMD ISP4 and camera driver"
-+	depends on VIDEO_DEV && VIDEO_V4L2_SUBDEV_API
++	depends on DRM_AMD_ISP && VIDEO_DEV
 +	select VIDEOBUF2_CORE
-+	select VIDEOBUF2_V4L2
 +	select VIDEOBUF2_MEMOPS
++	select VIDEOBUF2_V4L2
++	select VIDEO_V4L2_SUBDEV_API
 +	help
 +	  This is support for AMD ISP4 and camera subsystem driver.
 +	  Say Y here to enable the ISP4 and camera device for video capture.
@@ -97,7 +98,7 @@ index 000000000000..de0092dad26f
 +amd_capture-objs := isp4.o
 diff --git a/drivers/media/platform/amd/isp4/isp4.c b/drivers/media/platform/amd/isp4/isp4.c
 new file mode 100644
-index 000000000000..6ff3ded4310a
+index 000000000000..a3fc2462d70f
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4.c
 @@ -0,0 +1,121 @@
@@ -116,16 +117,16 @@ index 000000000000..6ff3ded4310a
 +
 +#define ISP4_DRV_NAME "amd_isp_capture"
 +
++const char *isp4_irq_name[] = {
++	"isp_irq_stream1",
++	"isp_irq_global"
++};
++
 +/* interrupt num */
 +static const u32 isp4_ringbuf_interrupt_num[] = {
 +	0, /* ISP_4_1__SRCID__ISP_RINGBUFFER_WPT9 */
-+	1, /* ISP_4_1__SRCID__ISP_RINGBUFFER_WPT10 */
-+	3, /* ISP_4_1__SRCID__ISP_RINGBUFFER_WPT11 */
 +	4, /* ISP_4_1__SRCID__ISP_RINGBUFFER_WPT12 */
 +};
-+
-+#define to_isp4_device(dev) \
-+	((struct isp4_device *)container_of(dev, struct isp4_device, v4l2_dev))
 +
 +static irqreturn_t isp4_irq_handler(int irq, void *arg)
 +{
@@ -138,7 +139,7 @@ index 000000000000..6ff3ded4310a
 +	struct isp4_device *isp_dev;
 +	int i, irq, ret;
 +
-+	isp_dev = devm_kzalloc(&pdev->dev, sizeof(*isp_dev), GFP_KERNEL);
++	isp_dev = devm_kzalloc(dev, sizeof(*isp_dev), GFP_KERNEL);
 +	if (!isp_dev)
 +		return -ENOMEM;
 +
@@ -148,11 +149,11 @@ index 000000000000..6ff3ded4310a
 +	for (i = 0; i < ARRAY_SIZE(isp4_ringbuf_interrupt_num); i++) {
 +		irq = platform_get_irq(pdev, isp4_ringbuf_interrupt_num[i]);
 +		if (irq < 0)
-+			return dev_err_probe(dev, -ENODEV,
++			return dev_err_probe(dev, irq,
 +					     "fail to get irq %d\n",
 +					     isp4_ringbuf_interrupt_num[i]);
-+		ret = devm_request_irq(&pdev->dev, irq, isp4_irq_handler, 0,
-+				       "ISP_IRQ", &pdev->dev);
++		ret = devm_request_irq(dev, irq, isp4_irq_handler, 0,
++				       isp4_irq_name[i], dev);
 +		if (ret)
 +			return dev_err_probe(dev, ret, "fail to req irq %d\n",
 +					     irq);
@@ -166,13 +167,13 @@ index 000000000000..6ff3ded4310a
 +		sizeof(isp_dev->mdev.model));
 +	snprintf(isp_dev->mdev.bus_info, sizeof(isp_dev->mdev.bus_info),
 +		 "platform:%s", ISP4_DRV_NAME);
-+	isp_dev->mdev.dev = &pdev->dev;
++	isp_dev->mdev.dev = dev;
 +	media_device_init(&isp_dev->mdev);
 +
 +	/* register v4l2 device */
 +	snprintf(isp_dev->v4l2_dev.name, sizeof(isp_dev->v4l2_dev.name),
 +		 "AMD-V4L2-ROOT");
-+	ret = v4l2_device_register(&pdev->dev, &isp_dev->v4l2_dev);
++	ret = v4l2_device_register(dev, &isp_dev->v4l2_dev);
 +	if (ret)
 +		return dev_err_probe(dev, ret,
 +				     "fail register v4l2 device\n");
@@ -224,10 +225,10 @@ index 000000000000..6ff3ded4310a
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/media/platform/amd/isp4/isp4.h b/drivers/media/platform/amd/isp4/isp4.h
 new file mode 100644
-index 000000000000..8535f662ab49
+index 000000000000..326b8094e99e
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4.h
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,20 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -236,19 +237,15 @@ index 000000000000..8535f662ab49
 +#ifndef _ISP4_H_
 +#define _ISP4_H_
 +
-+#include <linux/mutex.h>
 +#include <media/v4l2-device.h>
 +#include <media/videobuf2-memops.h>
-+#include <media/videobuf2-vmalloc.h>
 +
 +#define ISP4_GET_ISP_REG_BASE(isp4sd) (((isp4sd))->mmio)
 +
 +struct isp4_device {
 +	struct v4l2_device v4l2_dev;
 +	struct media_device mdev;
-+
 +	struct platform_device *pdev;
-+	struct notifier_block i2c_nb;
 +};
 +
 +#endif /* _ISP4_H_ */

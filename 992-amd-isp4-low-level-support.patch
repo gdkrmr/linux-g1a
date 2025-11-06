@@ -1,5 +1,5 @@
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 3ad845f1511b..d4723d0041c6 100644
+index 3640a1e3262c..7aa17c7e71d6 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -1145,6 +1145,7 @@ F:	drivers/media/platform/amd/isp4/Kconfig
@@ -10,22 +10,12 @@ index 3ad845f1511b..d4723d0041c6 100644
  
  AMD KFD
  M:	Felix Kuehling <Felix.Kuehling@amd.com>
-diff --git a/drivers/media/platform/amd/isp4/Makefile b/drivers/media/platform/amd/isp4/Makefile
-index de0092dad26f..eb130647fbe2 100644
---- a/drivers/media/platform/amd/isp4/Makefile
-+++ b/drivers/media/platform/amd/isp4/Makefile
-@@ -3,4 +3,4 @@
- # Copyright (C) 2025 Advanced Micro Devices, Inc.
- 
- obj-$(CONFIG_AMD_ISP4) += amd_capture.o
--amd_capture-objs := isp4.o
-+amd_capture-objs := isp4.o	\
 diff --git a/drivers/media/platform/amd/isp4/isp4_hw_reg.h b/drivers/media/platform/amd/isp4/isp4_hw_reg.h
 new file mode 100644
-index 000000000000..16a02a14d985
+index 000000000000..6697b09270ad
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_hw_reg.h
-@@ -0,0 +1,125 @@
+@@ -0,0 +1,119 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -35,7 +25,6 @@ index 000000000000..16a02a14d985
 +#define _ISP4_HW_REG_H_
 +
 +#include <linux/io.h>
-+#include <linux/types.h>
 +
 +#define ISP_SOFT_RESET			0x62000
 +#define ISP_SYS_INT0_EN			0x62010
@@ -43,11 +32,6 @@ index 000000000000..16a02a14d985
 +#define ISP_SYS_INT0_ACK		0x62018
 +#define ISP_CCPU_CNTL			0x62054
 +#define ISP_STATUS			0x62058
-+#define ISP_LOG_RB_BASE_LO0		0x62148
-+#define ISP_LOG_RB_BASE_HI0		0x6214c
-+#define ISP_LOG_RB_SIZE0		0x62150
-+#define ISP_LOG_RB_RPTR0		0x62154
-+#define ISP_LOG_RB_WPTR0		0x62158
 +#define ISP_RB_BASE_LO1			0x62170
 +#define ISP_RB_BASE_HI1			0x62174
 +#define ISP_RB_SIZE1			0x62178
@@ -150,4 +134,4 @@ index 000000000000..16a02a14d985
 +	return writel(val, base + reg);
 +}
 +
-+#endif
++#endif /* _ISP4_HW_REG_H_ */
