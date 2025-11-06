@@ -1,0 +1,5 @@
+src/
+pkg/
+linux-mainline/
+linux-g1a-*
+*.pkg.tar.zst
