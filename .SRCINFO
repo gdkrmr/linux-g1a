@@ -1,6 +1,6 @@
 pkgbase = linux-g1a
 	pkgdesc = Linux Mainline
-	pkgver = 6.17rc5
+	pkgver = 6.18rc4
 	pkgrel = 1
 	url = https://kernel.org/
 	arch = x86_64
@@ -25,14 +25,15 @@ pkgbase = linux-g1a
 	makedepends = texlive-latexextra
 	options = !debug
 	options = !strip
-	source = linux-mainline::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=v6.17-rc4
+	source = linux-mainline::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=v6.18-rc4
 	source = config
-	source = 990-amd-isp-capture.patch
-	source = 991-amd-ll-isp4.patch
-	source = 992-isp4-fw-hw-interface.patch
-	source = 993-isp4-firmware-loading.patch
-	source = 994-isp4-video-node.patch
-	source = 995-isp4-debug.patch
+	source = 991-amd-isp4-capture-driver.patch
+	source = 992-amd-isp4-low-level-support.patch
+	source = 993-amd-isp4-fw-hw-interface.patch
+	source = 994-amd-isp4-subdev-fw-loading.patch
+	source = 995-amd-isp4-video-node-buffer-handling.patch
+	source = 996-amd-isp4-debug-fs-logging.patch
+	source = 997-amd-isp4-documentation.patch
 	validpgpkeys = ABAF11C65A2970B130ABE3C479BE3E4300411886
 	validpgpkeys = 647F28654894E3BD457199BE38DBBDC86092693E
 	validpgpkeys = 83BC8889351B5DEBBB68416EB8AC08600F108CDF

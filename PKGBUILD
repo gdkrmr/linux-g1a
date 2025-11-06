@@ -6,8 +6,8 @@
 
 #pkgbase=linux-mainline
 pkgbase=linux-g1a       # Build kernel with a different name
-_tag=v6.17-rc5
-pkgver=6.17rc5
+_tag=v6.18-rc4
+pkgver=6.18rc4
 pkgrel=1
 pkgdesc="Linux Mainline"
 arch=(x86_64)
@@ -56,14 +56,15 @@ validpgpkeys=(
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
 )
-sha256sums=('51cebaa6e3a81ae3b41fe35a0a4c655ed9c7a365802be5135fd8c51b3aeba218'
+sha256sums=('8c64b84c9251b7630ace378e845d3dc3a266376b0e61564cadada28ef894b0e5'
             'f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072'
-            '873bd57526dc602cd7357bc8b629ece229ce2f8e2e90c8520e0c3a3de6b50e5c'
-            '0cf06d2e48ee41d8d3de07cbf7a82c22cdbe8edeb2e8e6764d682fdc343cbbb0'
-            'f66216db7350e2a3a99751d9ec91121d9883a82352658d50c1b0255b42395cdb'
-            '553458c8240385f07788258da74e30f0d5fb7539c97a5da60dbc41056190e789'
-            'f8afbdb8844c968e7cc44c88066c9f34374a6033ce4d3c47ed6696a12ee5555a'
-            '110a64c8d583bbe82158a79b9843604700a333cb41e291ee5f89ac9949dae48a')
+            '1309521dc83c6c42d049fd51f3239ec87d355c25eb7c8f8e696bbaed618a37ff'
+            '6a75c8d9556123ddf98141ce88d9f303fdf835150dd72a3239126b6178de4ff2'
+            '44de7e99a10377d3815f0dadf13a03b8a7bad4d61642e9bad2f5f3d445786d75'
+            '62a341b6eb4ef00731fa7e548517e038121c1d1bdeb35845243729429a0185bd'
+            'ddb2db869c80f4eee427f33ead9b73ecdeb0f60a406bb9452a19c44c09338014'
+            '6df60dae4df6cd512cb60b8a35026ed33bab7baadf9897c6e60f86b2c2d0992c'
+            '1d6da5732c16b04b71b0f54d408e028f04b2c45443285802617e9eca6c01bfd1')
 
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase
