@@ -1,3 +1,35 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v6 5/7] media: platform: amd: isp4 video node and buffers
+ handling added
+From: Bin Du <Bin.Du@amd.com>
+Date: Fri, 28 Nov 2025 17:19:27 +0800
+Message-Id: <20251128091929.165272-6-Bin.Du@amd.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Isp video implements v4l2 video interface and supports NV12 and YUYV. It
+manages buffers, pipeline power and state. Cherry-picked Sultan's DMA
+buffer related fix from branch v6.16-drm-tip-isp4-for-amd on
+https://github.com/kerneltoast/kernel_x86_laptop.git
+
+Co-developed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Signed-off-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Co-developed-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
+Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
+Signed-off-by: Bin Du <Bin.Du@amd.com>
+Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
+---
+ MAINTAINERS                                   |    2 +
+ drivers/media/platform/amd/isp4/Makefile      |    3 +-
+ drivers/media/platform/amd/isp4/isp4.c        |   10 +
+ drivers/media/platform/amd/isp4/isp4_subdev.c |   81 +-
+ drivers/media/platform/amd/isp4/isp4_subdev.h |    2 +
+ drivers/media/platform/amd/isp4/isp4_video.c  | 1158 +++++++++++++++++
+ drivers/media/platform/amd/isp4/isp4_video.h  |   65 +
+ 7 files changed, 1316 insertions(+), 5 deletions(-)
+ create mode 100644 drivers/media/platform/amd/isp4/isp4_video.c
+ create mode 100644 drivers/media/platform/amd/isp4/isp4_video.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
 index 48ffc8bbdcee..80c966fde0b4 100644
@@ -24,11 +56,11 @@ index 6d4e6d6ac7f5..398c20ea7866 100644
 +		    isp4_subdev.o \
 +		    isp4_video.o
 diff --git a/drivers/media/platform/amd/isp4/isp4.c b/drivers/media/platform/amd/isp4/isp4.c
-index c26830d6fb9e..d1579cc41c3c 100644
+index 0f3d87b7d5fa..91b4439a4b57 100644
 --- a/drivers/media/platform/amd/isp4/isp4.c
 +++ b/drivers/media/platform/amd/isp4/isp4.c
-@@ -146,6 +146,16 @@ static int isp4_capture_probe(struct platform_device *pdev)
- 		goto err_unreg_v4l2;
+@@ -168,6 +168,16 @@ static int isp4_capture_probe(struct platform_device *pdev)
+ 		goto err_pm_disable;
  	}
  
 +	ret = media_create_pad_link(&isp_dev->isp_subdev.sdev.entity,
@@ -37,96 +69,44 @@ index c26830d6fb9e..d1579cc41c3c 100644
 +				    MEDIA_LNK_FL_ENABLED |
 +				    MEDIA_LNK_FL_IMMUTABLE);
 +	if (ret) {
-+		dev_err(dev, "fail to create pad link %d\n", ret);
++		dev_err_probe(dev, ret, "fail to create pad link\n");
 +		goto err_isp4_deinit;
 +	}
 +
  	ret = media_device_register(&isp_dev->mdev);
  	if (ret) {
- 		dev_err(dev, "fail to register media device %d\n", ret);
-@@ -160,6 +170,7 @@ static int isp4_capture_probe(struct platform_device *pdev)
- 	isp4sd_deinit(&isp_dev->isp_subdev);
- err_unreg_v4l2:
- 	v4l2_device_unregister(&isp_dev->v4l2_dev);
-+	media_device_cleanup(&isp_dev->mdev);
- 
- 	return dev_err_probe(dev, ret, "isp probe fail\n");
- }
-@@ -169,8 +180,9 @@ static void isp4_capture_remove(struct platform_device *pdev)
- 	struct isp4_device *isp_dev = platform_get_drvdata(pdev);
- 
- 	media_device_unregister(&isp_dev->mdev);
--	v4l2_device_unregister(&isp_dev->v4l2_dev);
- 	isp4sd_deinit(&isp_dev->isp_subdev);
-+	v4l2_device_unregister(&isp_dev->v4l2_dev);
-+	media_device_cleanup(&isp_dev->mdev);
- }
- 
- static struct platform_driver isp4_capture_drv = {
+ 		dev_err_probe(dev, ret, "fail to register media device\n");
 diff --git a/drivers/media/platform/amd/isp4/isp4_subdev.c b/drivers/media/platform/amd/isp4/isp4_subdev.c
-index edb9e10b6bb8..56335803e378 100644
+index fac16207727e..0fa646e37e8c 100644
 --- a/drivers/media/platform/amd/isp4/isp4_subdev.c
 +++ b/drivers/media/platform/amd/isp4/isp4_subdev.c
-@@ -458,20 +458,25 @@ static struct isp4fw_meta_info *isp4sd_get_meta_by_mc(struct isp4_subdev *isp_su
+@@ -468,7 +468,7 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
+ 		return;
+ 	}
  
- static struct isp4if_img_buf_node *
- isp4sd_preview_done(struct isp4_subdev *isp_subdev,
--		    struct isp4fw_meta_info *meta)
-+		    struct isp4fw_meta_info *meta,
-+		    struct isp4vid_framedone_param *pcb)
- {
- 	struct isp4_interface *ispif = &isp_subdev->ispif;
- 	struct isp4if_img_buf_node *prev = NULL;
- 	struct device *dev = isp_subdev->dev;
- 
-+	pcb->preview.status = ISP4VID_BUF_DONE_STATUS_ABSENT;
- 	if (meta->preview.enabled &&
- 	    (meta->preview.status == BUFFER_STATUS_SKIPPED ||
+-	dev_dbg(dev, "ts:%llu,streamId:%d,poc:%u,preview_en:%u(%i)\n",
++	dev_dbg(dev, "ts:%llu,streamId:%d,poc:%u,preview_en:%u,(%i)\n",
+ 		ktime_get_ns(), stream_id, meta->poc,
+ 		meta->preview.enabled,
+ 		meta->preview.status);
+@@ -478,11 +478,13 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
  	     meta->preview.status == BUFFER_STATUS_DONE ||
  	     meta->preview.status == BUFFER_STATUS_DIRTY)) {
  		prev = isp4if_dequeue_buffer(ispif);
--		if (!prev)
-+		if (!prev) {
+-		if (prev)
++		if (prev) {
++			isp4vid_handle_frame_done(&isp_subdev->isp_vdev,
++						  &prev->buf_info);
+ 			isp4if_dealloc_buffer_node(prev);
+-		else
++		} else {
  			dev_err(dev, "fail null prev buf\n");
 -
-+		} else {
-+			pcb->preview.buf = prev->buf_info;
-+			pcb->preview.status = ISP4VID_BUF_DONE_STATUS_SUCCESS;
 +		}
  	} else if (meta->preview.enabled) {
  		dev_err(dev, "fail bad preview status %u\n",
  			meta->preview.status);
-@@ -522,8 +527,9 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
- 				      enum isp4if_stream_id stream_id,
- 				      struct isp4fw_resp_param_package *para)
- {
--	struct isp4if_img_buf_node *prev = NULL;
-+	struct isp4vid_framedone_param pcb = {};
- 	struct device *dev = isp_subdev->dev;
-+	struct isp4if_img_buf_node *prev;
- 	struct isp4fw_meta_info *meta;
- 	u64 mc = 0;
- 
-@@ -534,12 +540,17 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
- 		return;
- 	}
- 
-+	pcb.poc = meta->poc;
-+	pcb.cam_id = 0;
-+
- 	dev_dbg(dev, "ts:%llu,streamId:%d,poc:%u,preview_en:%u,(%i)\n",
- 		ktime_get_ns(), stream_id, meta->poc,
- 		meta->preview.enabled,
- 		meta->preview.status);
- 
--	prev = isp4sd_preview_done(isp_subdev, meta);
-+	prev = isp4sd_preview_done(isp_subdev, meta, &pcb);
-+	if (pcb.preview.status != ISP4VID_BUF_DONE_STATUS_ABSENT)
-+		isp4vid_notify(&isp_subdev->isp_vdev, &pcb);
- 
- 	isp4if_dealloc_buffer_node(prev);
- 
-@@ -891,6 +902,67 @@ static int isp4sd_start_stream(struct isp4_subdev *isp_subdev,
+@@ -821,6 +823,67 @@ static int isp4sd_start_stream(struct isp4_subdev *isp_subdev,
  	return ret;
  }
  
@@ -194,7 +174,7 @@ index edb9e10b6bb8..56335803e378 100644
  static int isp4sd_set_power(struct v4l2_subdev *sd, int on)
  {
  	struct isp4_subdev *isp_subdev = to_isp4_subdev(sd);
-@@ -990,6 +1062,10 @@ static const struct media_entity_operations isp4sd_sdev_ent_ops = {
+@@ -920,6 +983,10 @@ static const struct media_entity_operations isp4sd_sdev_ent_ops = {
  	.link_validate = isp4sd_sdev_link_validate,
  };
  
@@ -205,15 +185,7 @@ index edb9e10b6bb8..56335803e378 100644
  int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
  		int irq[ISP4SD_MAX_FW_RESP_STREAM_NUM])
  {
-@@ -1024,7 +1100,6 @@ int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
- 	ret = v4l2_device_register_subdev(v4l2_dev, &isp_subdev->sdev);
- 	if (ret) {
- 		dev_err(dev, "fail to register isp4 subdev to V4L2 device %d\n", ret);
--		v4l2_subdev_cleanup(&isp_subdev->sdev);
- 		goto err_media_clean_up;
- 	}
- 
-@@ -1052,11 +1127,17 @@ int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
+@@ -981,6 +1048,11 @@ int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
  	isp_subdev->host2fw_seq_num = 1;
  	ispif->status = ISP4IF_STATUS_PWR_OFF;
  
@@ -225,13 +197,7 @@ index edb9e10b6bb8..56335803e378 100644
  	return 0;
  
  err_subdev_unreg:
- 	v4l2_device_unregister_subdev(&isp_subdev->sdev);
- err_media_clean_up:
-+	v4l2_subdev_cleanup(&isp_subdev->sdev);
- 	media_entity_cleanup(&isp_subdev->sdev.entity);
- 	return ret;
- }
-@@ -1065,6 +1146,7 @@ void isp4sd_deinit(struct isp4_subdev *isp_subdev)
+@@ -995,6 +1067,7 @@ void isp4sd_deinit(struct isp4_subdev *isp_subdev)
  {
  	struct isp4_interface *ispif = &isp_subdev->ispif;
  
@@ -240,7 +206,7 @@ index edb9e10b6bb8..56335803e378 100644
  	media_entity_cleanup(&isp_subdev->sdev.entity);
  	isp4if_deinit(ispif);
 diff --git a/drivers/media/platform/amd/isp4/isp4_subdev.h b/drivers/media/platform/amd/isp4/isp4_subdev.h
-index a6990c8649bd..c4f207cc359b 100644
+index c6c6a20d2957..2d3844cf0152 100644
 --- a/drivers/media/platform/amd/isp4/isp4_subdev.h
 +++ b/drivers/media/platform/amd/isp4/isp4_subdev.h
 @@ -17,6 +17,7 @@
@@ -261,10 +227,10 @@ index a6990c8649bd..c4f207cc359b 100644
  
 diff --git a/drivers/media/platform/amd/isp4/isp4_video.c b/drivers/media/platform/amd/isp4/isp4_video.c
 new file mode 100644
-index 000000000000..456435f6e771
+index 000000000000..467ee80f54e8
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_video.c
-@@ -0,0 +1,1179 @@
+@@ -0,0 +1,1158 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -327,12 +293,10 @@ index 000000000000..456435f6e771
 +	{ 1, ISP4VID_MAX_PREVIEW_FPS }
 +};
 +
-+static void isp4vid_handle_frame_done(struct isp4vid_dev *isp_vdev,
-+				      const struct isp4if_img_buf_info *img_buf,
-+				      bool done_suc)
++void isp4vid_handle_frame_done(struct isp4vid_dev *isp_vdev,
++			       const struct isp4if_img_buf_info *img_buf)
 +{
 +	struct isp4vid_capture_buffer *isp4vid_buf;
-+	enum vb2_buffer_state state;
 +	void *vbuf;
 +
 +	scoped_guard(mutex, &isp_vdev->buf_list_lock) {
@@ -362,28 +326,10 @@ index 000000000000..456435f6e771
 +	vb2_set_plane_payload(&isp4vid_buf->vb2.vb2_buf,
 +			      0, isp_vdev->format.sizeimage);
 +
-+	state = done_suc ? VB2_BUF_STATE_DONE : VB2_BUF_STATE_ERROR;
-+	vb2_buffer_done(&isp4vid_buf->vb2.vb2_buf, state);
++	vb2_buffer_done(&isp4vid_buf->vb2.vb2_buf, VB2_BUF_STATE_DONE);
 +
 +	dev_dbg(isp_vdev->dev, "call vb2_buffer_done(size=%u)\n",
 +		isp_vdev->format.sizeimage);
-+}
-+
-+s32 isp4vid_notify(void *cb_ctx, struct isp4vid_framedone_param *evt_param)
-+{
-+	struct isp4vid_dev *isp4vid_vdev = cb_ctx;
-+
-+	if (evt_param->preview.status != ISP4VID_BUF_DONE_STATUS_ABSENT) {
-+		bool suc;
-+
-+		suc = (evt_param->preview.status ==
-+		       ISP4VID_BUF_DONE_STATUS_SUCCESS);
-+		isp4vid_handle_frame_done(isp4vid_vdev,
-+					  &evt_param->preview.buf,
-+					  suc);
-+	}
-+
-+	return 0;
 +}
 +
 +static unsigned int isp4vid_vb2_num_users(void *buf_priv)
@@ -928,7 +874,7 @@ index 000000000000..456435f6e771
 +		break;
 +	default:
 +		return -EINVAL;
-+	};
++	}
 +	fmt.which = V4L2_SUBDEV_FORMAT_ACTIVE;
 +	fmt.pad = ISP4VID_PAD_VIDEO_OUTPUT;
 +	fmt.format.width = pix_fmt->width;
@@ -1120,7 +1066,7 @@ index 000000000000..456435f6e771
 +	default:
 +		return 0;
 +	}
-+};
++}
 +
 +static int isp4vid_qops_queue_setup(struct vb2_queue *vq, unsigned int *nbuffers,
 +				    unsigned int *nplanes, unsigned int sizes[],
@@ -1134,7 +1080,7 @@ index 000000000000..456435f6e771
 +			"fail to setup queue, no mplane supported %u\n",
 +			*nplanes);
 +		return -EINVAL;
-+	};
++	}
 +
 +	if (*nplanes == 1) {
 +		unsigned int size;
@@ -1201,7 +1147,7 @@ index 000000000000..456435f6e771
 +			img_buf->planes[0].len);
 +
 +		img_buf->planes[1].len = uv_size;
-+		img_buf->planes[1].sys_addr = ((u8 *)priv_buf->vaddr + y_size);
++		img_buf->planes[1].sys_addr = priv_buf->vaddr + y_size;
 +		img_buf->planes[1].mc_addr = priv_buf->gpu_addr + y_size;
 +
 +		dev_dbg(isp_vdev->dev, "img_buf[1]: mc=0x%llx size=%u",
@@ -1233,8 +1179,8 @@ index 000000000000..456435f6e771
 +	if (isp_vdev->stream_started)
 +		isp_vdev->ops->send_buffer(isp_vdev->isp_sdev, img_buf);
 +
-+	guard(mutex)(&isp_vdev->buf_list_lock);
-+	list_add_tail(&buf->list, &isp_vdev->buf_list);
++	scoped_guard(mutex, &isp_vdev->buf_list_lock)
++		list_add_tail(&buf->list, &isp_vdev->buf_list);
 +}
 +
 +static int isp4vid_qops_start_streaming(struct vb2_queue *vq, unsigned int count)
@@ -1274,10 +1220,8 @@ index 000000000000..456435f6e771
 +		}
 +	}
 +
-+	list_for_each_entry(isp4vid_buf, &isp_vdev->buf_list, list) {
-+		isp_vdev->ops->send_buffer(isp_vdev->isp_sdev,
-+					   &isp4vid_buf->img_buf);
-+	}
++	list_for_each_entry(isp4vid_buf, &isp_vdev->buf_list, list)
++		isp_vdev->ops->send_buffer(isp_vdev->isp_sdev, &isp4vid_buf->img_buf);
 +
 +	/* Start the media pipeline */
 +	ret = video_device_pipeline_start(&isp_vdev->vdev, &isp_vdev->pipe);
@@ -1429,12 +1373,13 @@ index 000000000000..456435f6e771
 +	ret = video_register_device(vdev, VFL_TYPE_VIDEO, -1);
 +	if (ret) {
 +		dev_err(v4l2_dev->dev, "register video device fail:%d\n", ret);
-+		media_entity_cleanup(&isp_vdev->vdev.entity);
-+		goto err_release_vb2_queue;
++		goto err_entity_cleanup;
 +	}
 +
 +	return 0;
 +
++err_entity_cleanup:
++	media_entity_cleanup(&isp_vdev->vdev.entity);
 +err_release_vb2_queue:
 +	vb2_queue_release(q);
 +	return ret;
@@ -1446,10 +1391,10 @@ index 000000000000..456435f6e771
 +}
 diff --git a/drivers/media/platform/amd/isp4/isp4_video.h b/drivers/media/platform/amd/isp4/isp4_video.h
 new file mode 100644
-index 000000000000..d925f67567e7
+index 000000000000..b87316d2a2e5
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_video.h
-@@ -0,0 +1,84 @@
+@@ -0,0 +1,65 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -1462,26 +1407,6 @@ index 000000000000..d925f67567e7
 +#include <media/v4l2-dev.h>
 +
 +#include "isp4_interface.h"
-+
-+enum isp4vid_buf_done_status {
-+	/* It means no corresponding image buf in fw response */
-+	ISP4VID_BUF_DONE_STATUS_ABSENT,
-+	ISP4VID_BUF_DONE_STATUS_SUCCESS,
-+	ISP4VID_BUF_DONE_STATUS_FAILED
-+};
-+
-+struct isp4vid_buf_done_info {
-+	enum isp4vid_buf_done_status status;
-+	struct isp4if_img_buf_info buf;
-+};
-+
-+/* call back parameter for CB_EVT_ID_FRAME_DONE */
-+struct isp4vid_framedone_param {
-+	s32 poc;
-+	s32 cam_id;
-+	s64 time_stamp;
-+	struct isp4vid_buf_done_info preview;
-+};
 +
 +struct isp4vid_capture_buffer {
 +	/*
@@ -1531,6 +1456,10 @@ index 000000000000..d925f67567e7
 +
 +void isp4vid_dev_deinit(struct isp4vid_dev *isp_vdev);
 +
-+s32 isp4vid_notify(void *cb_ctx, struct isp4vid_framedone_param *evt_param);
++void isp4vid_handle_frame_done(struct isp4vid_dev *isp_vdev,
++			       const struct isp4if_img_buf_info *img_buf);
 +
 +#endif /* _ISP4_VIDEO_H_ */
+-- 
+2.34.1
+

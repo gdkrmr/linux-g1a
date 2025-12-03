@@ -6,8 +6,8 @@
 
 #pkgbase=linux-mainline
 pkgbase=linux-g1a       # Build kernel with a different name
-_tag=v6.18-rc7
-pkgver=6.18rc7
+_tag=v6.18
+pkgver=6.18
 pkgrel=1
 pkgdesc="Linux Mainline"
 arch=(x86_64)
@@ -43,28 +43,28 @@ _srcname=linux-mainline
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=$_tag"
   config         # the main kernel config file
-  "991-amd-isp4-capture-driver.patch"
-  "992-amd-isp4-low-level-support.patch"
-  "993-amd-isp4-fw-hw-interface.patch"
-  "994-amd-isp4-subdev-fw-loading.patch"
-  "995-amd-isp4-video-node-buffer-handling.patch"
-  "996-amd-isp4-debug-fs-logging.patch"
-  "997-amd-isp4-documentation.patch"
+  "0001.patch"
+  "0002.patch"
+  "0003.patch"
+  "0004.patch"
+  "0005.patch"
+  "0006.patch"
+  "0007.patch"
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
 )
-sha256sums=('3038a0437c975438f17862085337debff6368cef7247de1fdc660d72eb42713d'
+sha256sums=('24f57ef27799392461ce0e1d595f96412af7ade4bfd41625e563fd797743d06a'
             'f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072'
-            '1309521dc83c6c42d049fd51f3239ec87d355c25eb7c8f8e696bbaed618a37ff'
-            '6a75c8d9556123ddf98141ce88d9f303fdf835150dd72a3239126b6178de4ff2'
-            '44de7e99a10377d3815f0dadf13a03b8a7bad4d61642e9bad2f5f3d445786d75'
-            '62a341b6eb4ef00731fa7e548517e038121c1d1bdeb35845243729429a0185bd'
-            'ddb2db869c80f4eee427f33ead9b73ecdeb0f60a406bb9452a19c44c09338014'
-            '6df60dae4df6cd512cb60b8a35026ed33bab7baadf9897c6e60f86b2c2d0992c'
-            '1d6da5732c16b04b71b0f54d408e028f04b2c45443285802617e9eca6c01bfd1')
+            '8caf5a5a2387b3eb63925b8d58db8ff59f59e43c3fb763ee4bffb9ba2ebc4973'
+            'f587bc43d764e0362c0e034be749aed87b5d0f175174d5ff4d6d30faf14fda66'
+            '31980d2c7a6d30fbc989fa14456486697419886a2c730a40637e1edbb0165e38'
+            '1fb405f281a5e4bbe113a888f3f08467dbc884562bf1bc36ebb6c585ea0d5904'
+            '78ff1b985004ba2350dcf32788fc7d4f4aa42172facca3ee85d07e4b8702b345'
+            'd3fb668a46ccc964929d2e5e6701d83da969825d48b95bbc1c73943c2d3a2f05'
+            '8e295345b98d2693d1c6834d84ff87a2d2e95af8e8d2ca46bb40c78f4314c810')
 
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase

@@ -1,3 +1,30 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v6 2/7] media: platform: amd: low level support for isp4
+ firmware
+From: Bin Du <Bin.Du@amd.com>
+Date: Fri, 28 Nov 2025 17:19:24 +0800
+Message-Id: <20251128091929.165272-3-Bin.Du@amd.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Low level functions for accessing the registers and mapping to their
+ranges. This change also includes register definitions for ring buffer
+used to communicate with ISP Firmware. Ring buffer is the communication
+interface between driver and ISP Firmware. Command and responses are
+exchanged through the ring buffer.
+
+Co-developed-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
+Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
+Signed-off-by: Bin Du <Bin.Du@amd.com>
+Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
+Signed-off-by: Sultan Alsawaf <sultan@kerneltoast.com>
+---
+ MAINTAINERS                                   |   1 +
+ drivers/media/platform/amd/isp4/isp4_hw_reg.h | 124 ++++++++++++++++++
+ 2 files changed, 125 insertions(+)
+ create mode 100644 drivers/media/platform/amd/isp4/isp4_hw_reg.h
+
 diff --git a/MAINTAINERS b/MAINTAINERS
 index 3640a1e3262c..7aa17c7e71d6 100644
 --- a/MAINTAINERS
@@ -12,10 +39,10 @@ index 3640a1e3262c..7aa17c7e71d6 100644
  M:	Felix Kuehling <Felix.Kuehling@amd.com>
 diff --git a/drivers/media/platform/amd/isp4/isp4_hw_reg.h b/drivers/media/platform/amd/isp4/isp4_hw_reg.h
 new file mode 100644
-index 000000000000..6697b09270ad
+index 000000000000..09c76f75c5ee
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_hw_reg.h
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,124 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -32,6 +59,11 @@ index 000000000000..6697b09270ad
 +#define ISP_SYS_INT0_ACK		0x62018
 +#define ISP_CCPU_CNTL			0x62054
 +#define ISP_STATUS			0x62058
++#define ISP_LOG_RB_BASE_LO0		0x62148
++#define ISP_LOG_RB_BASE_HI0		0x6214c
++#define ISP_LOG_RB_SIZE0		0x62150
++#define ISP_LOG_RB_RPTR0		0x62154
++#define ISP_LOG_RB_WPTR0		0x62158
 +#define ISP_RB_BASE_LO1			0x62170
 +#define ISP_RB_BASE_HI1			0x62174
 +#define ISP_RB_SIZE1			0x62178
@@ -135,3 +167,6 @@ index 000000000000..6697b09270ad
 +}
 +
 +#endif /* _ISP4_HW_REG_H_ */
+-- 
+2.34.1
+
