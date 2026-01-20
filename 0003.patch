@@ -1,8 +1,8 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v6 3/7] media: platform: amd: Add isp4 fw and hw interface
+Subject: [PATCH v7 3/7] media: platform: amd: Add isp4 fw and hw interface
 From: Bin Du <Bin.Du@amd.com>
-Date: Fri, 28 Nov 2025 17:19:25 +0800
-Message-Id: <20251128091929.165272-4-Bin.Du@amd.com>
+Date: Tue, 16 Dec 2025 17:13:22 +0800
+Message-Id: <20251216091326.111977-4-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -25,13 +25,16 @@ Co-developed-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Bin Du <Bin.Du@amd.com>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
+Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Kate Hsuan <hpa@redhat.com>
 ---
  MAINTAINERS                                   |   3 +
  drivers/media/platform/amd/isp4/Makefile      |   3 +-
  .../platform/amd/isp4/isp4_fw_cmd_resp.h      | 314 +++++++
- .../media/platform/amd/isp4/isp4_interface.c  | 784 ++++++++++++++++++
- .../media/platform/amd/isp4/isp4_interface.h  | 140 ++++
- 5 files changed, 1243 insertions(+), 1 deletion(-)
+ .../media/platform/amd/isp4/isp4_interface.c  | 786 ++++++++++++++++++
+ .../media/platform/amd/isp4/isp4_interface.h  | 141 ++++
+ 5 files changed, 1246 insertions(+), 1 deletion(-)
  create mode 100644 drivers/media/platform/amd/isp4/isp4_fw_cmd_resp.h
  create mode 100644 drivers/media/platform/amd/isp4/isp4_interface.c
  create mode 100644 drivers/media/platform/amd/isp4/isp4_interface.h
@@ -384,10 +387,10 @@ index 000000000000..d571b3873edb
 +#endif /* _ISP4_CMD_RESP_H_ */
 diff --git a/drivers/media/platform/amd/isp4/isp4_interface.c b/drivers/media/platform/amd/isp4/isp4_interface.c
 new file mode 100644
-index 000000000000..2ab5029d39a9
+index 000000000000..914a93f9652e
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_interface.c
-@@ -0,0 +1,784 @@
+@@ -0,0 +1,786 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -660,8 +663,7 @@ index 000000000000..2ab5029d39a9
 +	guard(spinlock)(&ispif->cmdq_lock);
 +
 +	list_for_each_entry(buf_node, &ispif->cmdq, list) {
-+		if (buf_node->seq_num == seq_num &&
-+		    buf_node->cmd_id == cmd_id) {
++		if (buf_node->seq_num == seq_num && buf_node->cmd_id == cmd_id) {
 +			list_del(&buf_node->list);
 +			return buf_node;
 +		}
@@ -804,6 +806,7 @@ index 000000000000..2ab5029d39a9
 +			ret = -ETIMEDOUT;
 +			goto err_dequeue_ele;
 +		}
++
 +		ret = 0;
 +		goto put_ele_ref;
 +	}
@@ -818,10 +821,12 @@ index 000000000000..2ab5029d39a9
 +	 */
 +	if (ele && isp4if_rm_cmd_from_cmdq(ispif, seq_num, cmd_id))
 +		goto free_ele;
++
 +put_ele_ref:
 +	/* Don't free the command if we didn't put the last reference */
 +	if (ele && atomic_dec_return(&ele->refcnt))
 +		ele = NULL;
++
 +free_ele:
 +	kfree(ele);
 +	return ret;
@@ -1174,10 +1179,10 @@ index 000000000000..2ab5029d39a9
 +}
 diff --git a/drivers/media/platform/amd/isp4/isp4_interface.h b/drivers/media/platform/amd/isp4/isp4_interface.h
 new file mode 100644
-index 000000000000..2ec48e1a0503
+index 000000000000..01d5268f7d4c
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_interface.h
-@@ -0,0 +1,140 @@
+@@ -0,0 +1,141 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -1276,6 +1281,7 @@ index 000000000000..2ec48e1a0503
 +{
 +	if (lo)
 +		*lo = addr & 0xffffffff;
++
 +	if (hi)
 +		*hi = addr >> 32;
 +}

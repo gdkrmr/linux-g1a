@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v6 7/7] Documentation: add documentation of AMD isp 4
+Subject: [PATCH v7 7/7] Documentation: add documentation of AMD isp 4
  driver
 From: Bin Du <Bin.Du@amd.com>
-Date: Fri, 28 Nov 2025 17:19:29 +0800
-Message-Id: <20251128091929.165272-8-Bin.Du@amd.com>
+Date: Tue, 16 Dec 2025 17:13:26 +0800
+Message-Id: <20251216091326.111977-8-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -15,7 +15,9 @@ Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Bin Du <Bin.Du@amd.com>
 Reviewed-by: Mario Limonciello (AMD) <superm1@kernel.org>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
-Signed-off-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Kate Hsuan <hpa@redhat.com>
 ---
  Documentation/admin-guide/media/amdisp4-1.rst | 63 +++++++++++++++++++
  Documentation/admin-guide/media/amdisp4.dot   |  6 ++

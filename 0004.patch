@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v6 4/7] media: platform: amd: isp4 subdev and firmware
+Subject: [PATCH v7 4/7] media: platform: amd: isp4 subdev and firmware
  loading handling added
 From: Bin Du <Bin.Du@amd.com>
-Date: Fri, 28 Nov 2025 17:19:26 +0800
-Message-Id: <20251128091929.165272-5-Bin.Du@amd.com>
+Date: Tue, 16 Dec 2025 17:13:23 +0800
+Message-Id: <20251216091326.111977-5-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -19,14 +19,17 @@ Co-developed-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Bin Du <Bin.Du@amd.com>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
+Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Kate Hsuan <hpa@redhat.com>
 ---
- MAINTAINERS                                   |    2 +
- drivers/media/platform/amd/isp4/Makefile      |    3 +-
- drivers/media/platform/amd/isp4/isp4.c        |   98 +-
- drivers/media/platform/amd/isp4/isp4.h        |    7 +-
- drivers/media/platform/amd/isp4/isp4_subdev.c | 1004 +++++++++++++++++
- drivers/media/platform/amd/isp4/isp4_subdev.h |  123 ++
- 6 files changed, 1229 insertions(+), 8 deletions(-)
+ MAINTAINERS                                   |   2 +
+ drivers/media/platform/amd/isp4/Makefile      |   3 +-
+ drivers/media/platform/amd/isp4/isp4.c        |  99 +-
+ drivers/media/platform/amd/isp4/isp4.h        |   7 +-
+ drivers/media/platform/amd/isp4/isp4_subdev.c | 975 ++++++++++++++++++
+ drivers/media/platform/amd/isp4/isp4_subdev.h | 124 +++
+ 6 files changed, 1202 insertions(+), 8 deletions(-)
  create mode 100644 drivers/media/platform/amd/isp4/isp4_subdev.c
  create mode 100644 drivers/media/platform/amd/isp4/isp4_subdev.h
 
@@ -55,7 +58,7 @@ index a2a5bf98e912..6d4e6d6ac7f5 100644
 +		    isp4_interface.o \
 +		    isp4_subdev.o
 diff --git a/drivers/media/platform/amd/isp4/isp4.c b/drivers/media/platform/amd/isp4/isp4.c
-index e77713e4ea56..0f3d87b7d5fa 100644
+index ad95e7f89189..bcd7cad32afd 100644
 --- a/drivers/media/platform/amd/isp4/isp4.c
 +++ b/drivers/media/platform/amd/isp4/isp4.c
 @@ -3,15 +3,19 @@
@@ -80,7 +83,7 @@ index e77713e4ea56..0f3d87b7d5fa 100644
  
  static const struct {
  	const char *name;
-@@ -19,27 +23,96 @@ static const struct {
+@@ -19,27 +23,97 @@ static const struct {
  	u32 en_mask;
  	u32 ack_mask;
  	u32 rb_int_num;
@@ -114,6 +117,7 @@ index e77713e4ea56..0f3d87b7d5fa 100644
 +		intr_en |= isp4_irq[index].en_mask;
 +	else
 +		intr_en &= ~isp4_irq[index].en_mask;
++
 +	isp4hw_wreg(isp_subdev->mmio, ISP_SYS_INT0_EN, intr_en);
 +	spin_unlock_irq(&isp_subdev->irq_lock);
 +}
@@ -179,7 +183,7 @@ index e77713e4ea56..0f3d87b7d5fa 100644
  	struct isp4_device *isp_dev;
  	size_t i;
  	int ret;
-@@ -50,6 +123,11 @@ static int isp4_capture_probe(struct platform_device *pdev)
+@@ -50,6 +124,11 @@ static int isp4_capture_probe(struct platform_device *pdev)
  
  	dev->init_name = ISP4_DRV_NAME;
  
@@ -191,7 +195,7 @@ index e77713e4ea56..0f3d87b7d5fa 100644
  	for (i = 0; i < ARRAY_SIZE(isp4_irq); i++) {
  		irq[i] = platform_get_irq(pdev, isp4_irq[i].rb_int_num);
  		if (irq[i] < 0)
-@@ -57,7 +135,7 @@ static int isp4_capture_probe(struct platform_device *pdev)
+@@ -57,7 +136,7 @@ static int isp4_capture_probe(struct platform_device *pdev)
  					     isp4_irq[i].rb_int_num);
  
  		ret = devm_request_irq(dev, irq[i], isp4_irq_handler,
@@ -200,7 +204,7 @@ index e77713e4ea56..0f3d87b7d5fa 100644
  		if (ret)
  			return dev_err_probe(dev, ret, "fail to req irq %d\n", irq[i]);
  	}
-@@ -83,6 +161,13 @@ static int isp4_capture_probe(struct platform_device *pdev)
+@@ -83,6 +162,13 @@ static int isp4_capture_probe(struct platform_device *pdev)
  
  	pm_runtime_set_suspended(dev);
  	pm_runtime_enable(dev);
@@ -214,7 +218,7 @@ index e77713e4ea56..0f3d87b7d5fa 100644
  	ret = media_device_register(&isp_dev->mdev);
  	if (ret) {
  		dev_err_probe(dev, ret, "fail to register media device\n");
-@@ -94,6 +179,8 @@ static int isp4_capture_probe(struct platform_device *pdev)
+@@ -94,6 +180,8 @@ static int isp4_capture_probe(struct platform_device *pdev)
  	return 0;
  
  err_isp4_deinit:
@@ -223,14 +227,14 @@ index e77713e4ea56..0f3d87b7d5fa 100644
  	pm_runtime_disable(dev);
  	v4l2_device_unregister(&isp_dev->v4l2_dev);
  err_clean_media:
-@@ -108,6 +195,7 @@ static void isp4_capture_remove(struct platform_device *pdev)
+@@ -108,6 +196,7 @@ static void isp4_capture_remove(struct platform_device *pdev)
  	struct device *dev = &pdev->dev;
  
  	media_device_unregister(&isp_dev->mdev);
 +	isp4sd_deinit(&isp_dev->isp_subdev);
+ 	pm_runtime_disable(dev);
  	v4l2_device_unregister(&isp_dev->v4l2_dev);
  	media_device_cleanup(&isp_dev->mdev);
- 	pm_runtime_disable(dev);
 diff --git a/drivers/media/platform/amd/isp4/isp4.h b/drivers/media/platform/amd/isp4/isp4.h
 index 7f2db0dfa2d9..2db6683d6d8b 100644
 --- a/drivers/media/platform/amd/isp4/isp4.h
@@ -255,10 +259,10 @@ index 7f2db0dfa2d9..2db6683d6d8b 100644
  #endif /* _ISP4_H_ */
 diff --git a/drivers/media/platform/amd/isp4/isp4_subdev.c b/drivers/media/platform/amd/isp4/isp4_subdev.c
 new file mode 100644
-index 000000000000..fac16207727e
+index 000000000000..3a25d1fc49ce
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_subdev.c
-@@ -0,0 +1,1004 @@
+@@ -0,0 +1,975 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -320,7 +324,7 @@ index 000000000000..fac16207727e
 +	isp4if_split_addr64(ispif->fw_mem_pool->gpu_mc_addr,
 +			    &buf_type.buffer.buf_base_a_lo,
 +			    &buf_type.buffer.buf_base_a_hi);
-+	buf_type.buffer.buf_size_a = (u32)ispif->fw_mem_pool->mem_size;
++	buf_type.buffer.buf_size_a = ispif->fw_mem_pool->mem_size;
 +
 +	ret = isp4if_send_command(ispif, CMD_ID_SEND_BUFFER,
 +				  &buf_type, sizeof(buf_type));
@@ -382,12 +386,13 @@ index 000000000000..fac16207727e
 +			dev_err(dev, "fail for no meta info buf(%u)\n", i);
 +			return -ENOMEM;
 +		}
++
 +		buf_type.buffer_type = BUFFER_TYPE_META_INFO;
 +		buf_type.buffer.vmid_space.bit.space = ADDR_SPACE_TYPE_GPU_VA;
-+		isp4if_split_addr64(isp_subdev->ispif.meta_info_buf[i]->gpu_mc_addr,
++		isp4if_split_addr64(meta_info_buf->gpu_mc_addr,
 +				    &buf_type.buffer.buf_base_a_lo,
 +				    &buf_type.buffer.buf_base_a_hi);
-+		buf_type.buffer.buf_size_a = (u32)isp_subdev->ispif.meta_info_buf[i]->mem_size;
++		buf_type.buffer.buf_size_a = meta_info_buf->mem_size;
 +		ret = isp4if_send_command(ispif, CMD_ID_SEND_BUFFER,
 +					  &buf_type, sizeof(buf_type));
 +		if (ret) {
@@ -465,8 +470,7 @@ index 000000000000..fac16207727e
 +	sensor_info->status = ISP4SD_START_STATUS_OFF;
 +
 +	if (!sensor_info->start_stream_cmd_sent &&
-+	    sensor_info->buf_sent_cnt >=
-+	    ISP4SD_MIN_BUF_CNT_BEF_START_STREAM) {
++	    sensor_info->buf_sent_cnt >= ISP4SD_MIN_BUF_CNT_BEF_START_STREAM) {
 +		int ret = isp4if_send_command(ispif, CMD_ID_START_STREAM,
 +					      NULL, 0);
 +		if (ret) {
@@ -584,7 +588,7 @@ index 000000000000..fac16207727e
 +	struct device *dev = isp_subdev->dev;
 +	int ret;
 +
-+	ret  = isp4sd_setup_fw_mem_pool(isp_subdev);
++	ret = isp4sd_setup_fw_mem_pool(isp_subdev);
 +	if (ret) {
 +		dev_err(dev, "fail to setup fw mem pool\n");
 +		return ret;
@@ -599,10 +603,12 @@ index 000000000000..fac16207727e
 +	return 0;
 +}
 +
-+static void isp4sd_reset_stream_info(struct isp4_subdev *isp_subdev,
-+				     struct v4l2_subdev_state *state, u32 pad)
++static void isp4sd_uninit_stream(struct isp4_subdev *isp_subdev,
++				 struct v4l2_subdev_state *state, u32 pad)
 +{
 +	struct isp4sd_sensor_info *sensor_info = &isp_subdev->sensor_info;
++	struct isp4sd_output_info *output_info = &sensor_info->output_info;
++	struct isp4_interface *ispif = &isp_subdev->ispif;
 +	struct v4l2_mbus_framefmt *format;
 +
 +	format = v4l2_subdev_state_get_format(state, pad, 0);
@@ -613,35 +619,14 @@ index 000000000000..fac16207727e
 +		format->code = MEDIA_BUS_FMT_YUYV8_1_5X8;
 +	}
 +
-+	sensor_info->output_info.start_status = ISP4SD_START_STATUS_OFF;
-+}
-+
-+static void isp4sd_reset_camera_info(struct isp4_subdev *isp_subdev,
-+				     struct v4l2_subdev_state *state, u32 pad)
-+{
-+	struct isp4sd_sensor_info *sensor_info = &isp_subdev->sensor_info;
-+
-+	sensor_info->status = ISP4SD_START_STATUS_OFF;
-+	isp4sd_reset_stream_info(isp_subdev, state, pad);
++	isp4if_clear_bufq(ispif);
++	isp4if_clear_cmdq(ispif);
 +
 +	sensor_info->start_stream_cmd_sent = false;
-+}
++	sensor_info->buf_sent_cnt = 0;
 +
-+static int isp4sd_uninit_stream(struct isp4_subdev *isp_subdev,
-+				struct v4l2_subdev_state *state, u32 pad)
-+{
-+	struct isp4sd_output_info *output_info = &isp_subdev->sensor_info.output_info;
-+	struct isp4_interface *ispif = &isp_subdev->ispif;
-+	struct device *dev = isp_subdev->dev;
-+
-+	if (output_info->start_status == ISP4SD_START_STATUS_STARTED) {
-+		dev_dbg(dev, "fail for stream is still running\n");
-+		return -EINVAL;
-+	}
-+
-+	isp4sd_reset_camera_info(isp_subdev, state, pad);
-+	isp4if_clear_cmdq(ispif);
-+	return 0;
++	sensor_info->status = ISP4SD_START_STATUS_OFF;
++	output_info->start_status = ISP4SD_START_STATUS_OFF;
 +}
 +
 +static void isp4sd_fw_resp_cmd_done(struct isp4_subdev *isp_subdev,
@@ -720,7 +705,7 @@ index 000000000000..fac16207727e
 +	struct device *dev = isp_subdev->dev;
 +	struct isp4if_img_buf_node *prev;
 +	struct isp4fw_meta_info *meta;
-+	u64 mc = 0;
++	u64 mc;
 +
 +	mc = isp4if_join_addr64(para->package_addr_lo, para->package_addr_hi);
 +	meta = isp4sd_get_meta_by_mc(isp_subdev, mc);
@@ -802,7 +787,7 @@ index 000000000000..fac16207727e
 +	struct isp4_subdev_thread_param *para = context;
 +	struct isp4_subdev *isp_subdev = para->isp_subdev;
 +	struct isp4sd_thread_handler *thread_ctx =
-+		&isp_subdev->fw_resp_thread[para->idx];
++			&isp_subdev->fw_resp_thread[para->idx];
 +	struct device *dev = isp_subdev->dev;
 +
 +	dev_dbg(dev, "[%u] fw resp thread started\n", para->idx);
@@ -893,8 +878,7 @@ index 000000000000..fac16207727e
 +
 +	ret = dev_pm_genpd_set_performance_state(dev, perf_state);
 +	if (ret)
-+		dev_err(dev,
-+			"fail to set isp_subdev performance state %u,ret %d\n",
++		dev_err(dev, "fail to set isp_subdev performance state %u,ret %d\n",
 +			perf_state, ret);
 +
 +	/* hold ccpu reset */
@@ -933,9 +917,6 @@ index 000000000000..fac16207727e
 +
 +	isp4sd_module_enable(isp_subdev, true);
 +
-+	isp_subdev->sensor_info.start_stream_cmd_sent = false;
-+	isp_subdev->sensor_info.buf_sent_cnt = 0;
-+
 +	if (ispif->status < ISP4IF_STATUS_PWR_ON) {
 +		unsigned int perf_state = ISP4SD_PERFORMANCE_STATE_HIGH;
 +
@@ -972,6 +953,7 @@ index 000000000000..fac16207727e
 +		dev_err(dev, "isp_start_resp_proc_threads fail");
 +		goto err_deinit;
 +	}
++
 +	dev_dbg(dev, "create resp threads ok");
 +
 +	for (int i = 0; i < ISP4SD_MAX_FW_RESP_STREAM_NUM; i++)
@@ -987,17 +969,17 @@ index 000000000000..fac16207727e
 +static int isp4sd_stop_stream(struct isp4_subdev *isp_subdev,
 +			      struct v4l2_subdev_state *state, u32 pad)
 +{
-+	struct isp4sd_output_info *output_info =
-+			&isp_subdev->sensor_info.output_info;
++	struct isp4sd_sensor_info *sensor_info = &isp_subdev->sensor_info;
++	struct isp4sd_output_info *output_info = &sensor_info->output_info;
 +	struct isp4_interface *ispif = &isp_subdev->ispif;
 +	struct device *dev = isp_subdev->dev;
-+	int ret = 0;
 +
 +	guard(mutex)(&isp_subdev->ops_mutex);
 +	dev_dbg(dev, "status %i\n", output_info->start_status);
 +
 +	if (output_info->start_status == ISP4SD_START_STATUS_STARTED) {
 +		struct isp4fw_cmd_enable_out_ch cmd_ch_disable;
++		int ret;
 +
 +		/*
 +		 * The struct will be shared with ISP FW, use memset() to guarantee
@@ -1021,11 +1003,6 @@ index 000000000000..fac16207727e
 +		else
 +			dev_dbg(dev, "wait stop stream suc\n");
 +	}
-+
-+	isp4if_clear_bufq(ispif);
-+
-+	output_info->start_status = ISP4SD_START_STATUS_OFF;
-+	isp4sd_reset_stream_info(isp_subdev, state, pad);
 +
 +	isp4sd_uninit_stream(isp_subdev, state, pad);
 +
@@ -1129,14 +1106,13 @@ index 000000000000..fac16207727e
 +		break;
 +	}
 +	if (!steam_info->image_size) {
-+		dev_err(sd->dev,
-+			"fail set pad format,code 0x%x,width %u, height %u\n",
++		dev_err(sd->dev, "fail set pad format,code 0x%x,width %u, height %u\n",
 +			format->code, format->width, format->height);
 +		return -EINVAL;
 +	}
-+	dev_dbg(sd->dev,
-+		"set pad format suc, code:%x w:%u h:%u size:%u\n", format->code,
-+		format->width, format->height, steam_info->image_size);
++
++	dev_dbg(sd->dev, "set pad format suc, code:%x w:%u h:%u size:%u\n",
++		format->code, format->width, format->height, steam_info->image_size);
 +
 +	return 0;
 +}
@@ -1184,8 +1160,8 @@ index 000000000000..fac16207727e
 +int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
 +		int irq[ISP4SD_MAX_FW_RESP_STREAM_NUM])
 +{
++	struct isp4sd_sensor_info *sensor_info = &isp_subdev->sensor_info;
 +	struct isp4_interface *ispif = &isp_subdev->ispif;
-+	struct isp4sd_sensor_info *sensor_info;
 +	struct device *dev = v4l2_dev->dev;
 +	int ret;
 +
@@ -1206,24 +1182,23 @@ index 000000000000..fac16207727e
 +		dev_err(dev, "fail to init isp4 subdev entity pad %d\n", ret);
 +		return ret;
 +	}
++
 +	ret = v4l2_subdev_init_finalize(&isp_subdev->sdev);
 +	if (ret < 0) {
 +		dev_err(dev, "fail to init finalize isp4 subdev %d\n",
 +			ret);
 +		return ret;
 +	}
++
 +	ret = v4l2_device_register_subdev(v4l2_dev, &isp_subdev->sdev);
 +	if (ret) {
 +		dev_err(dev, "fail to register isp4 subdev to V4L2 device %d\n", ret);
 +		goto err_media_clean_up;
 +	}
 +
-+	sensor_info = &isp_subdev->sensor_info;
-+
 +	isp4if_init(ispif, dev, isp_subdev->mmio);
 +
 +	mutex_init(&isp_subdev->ops_mutex);
-+	sensor_info->start_stream_cmd_sent = false;
 +	sensor_info->status = ISP4SD_START_STATUS_OFF;
 +
 +	/* create ISP enable gpio control */
@@ -1265,10 +1240,10 @@ index 000000000000..fac16207727e
 +}
 diff --git a/drivers/media/platform/amd/isp4/isp4_subdev.h b/drivers/media/platform/amd/isp4/isp4_subdev.h
 new file mode 100644
-index 000000000000..c6c6a20d2957
+index 000000000000..70007b9de3f3
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_subdev.h
-@@ -0,0 +1,123 @@
+@@ -0,0 +1,124 @@
 +/* SPDX-License-Identifier: GPL-2.0+ */
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -1384,6 +1359,7 @@ index 000000000000..c6c6a20d2957
 +	struct isp4_subdev_thread_param isp_resp_para[ISP4SD_MAX_FW_RESP_STREAM_NUM];
 +	int irq[ISP4SD_MAX_FW_RESP_STREAM_NUM];
 +	bool irq_enabled;
++	/* spin lock to access ISP_SYS_INT0_EN exclusively */
 +	spinlock_t irq_lock;
 +};
 +

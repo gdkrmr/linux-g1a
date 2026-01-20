@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v6 5/7] media: platform: amd: isp4 video node and buffers
+Subject: [PATCH v7 5/7] media: platform: amd: isp4 video node and buffers
  handling added
 From: Bin Du <Bin.Du@amd.com>
-Date: Fri, 28 Nov 2025 17:19:27 +0800
-Message-Id: <20251128091929.165272-6-Bin.Du@amd.com>
+Date: Tue, 16 Dec 2025 17:13:24 +0800
+Message-Id: <20251216091326.111977-6-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -19,15 +19,18 @@ Co-developed-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Bin Du <Bin.Du@amd.com>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
+Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Kate Hsuan <hpa@redhat.com>
 ---
  MAINTAINERS                                   |    2 +
  drivers/media/platform/amd/isp4/Makefile      |    3 +-
  drivers/media/platform/amd/isp4/isp4.c        |   10 +
- drivers/media/platform/amd/isp4/isp4_subdev.c |   81 +-
+ drivers/media/platform/amd/isp4/isp4_subdev.c |   79 +-
  drivers/media/platform/amd/isp4/isp4_subdev.h |    2 +
- drivers/media/platform/amd/isp4/isp4_video.c  | 1158 +++++++++++++++++
+ drivers/media/platform/amd/isp4/isp4_video.c  | 1165 +++++++++++++++++
  drivers/media/platform/amd/isp4/isp4_video.h  |   65 +
- 7 files changed, 1316 insertions(+), 5 deletions(-)
+ 7 files changed, 1321 insertions(+), 5 deletions(-)
  create mode 100644 drivers/media/platform/amd/isp4/isp4_video.c
  create mode 100644 drivers/media/platform/amd/isp4/isp4_video.h
 
@@ -56,10 +59,10 @@ index 6d4e6d6ac7f5..398c20ea7866 100644
 +		    isp4_subdev.o \
 +		    isp4_video.o
 diff --git a/drivers/media/platform/amd/isp4/isp4.c b/drivers/media/platform/amd/isp4/isp4.c
-index 0f3d87b7d5fa..91b4439a4b57 100644
+index bcd7cad32afd..b5470f6dc93e 100644
 --- a/drivers/media/platform/amd/isp4/isp4.c
 +++ b/drivers/media/platform/amd/isp4/isp4.c
-@@ -168,6 +168,16 @@ static int isp4_capture_probe(struct platform_device *pdev)
+@@ -169,6 +169,16 @@ static int isp4_capture_probe(struct platform_device *pdev)
  		goto err_pm_disable;
  	}
  
@@ -77,10 +80,10 @@ index 0f3d87b7d5fa..91b4439a4b57 100644
  	if (ret) {
  		dev_err_probe(dev, ret, "fail to register media device\n");
 diff --git a/drivers/media/platform/amd/isp4/isp4_subdev.c b/drivers/media/platform/amd/isp4/isp4_subdev.c
-index fac16207727e..0fa646e37e8c 100644
+index 3a25d1fc49ce..8c33187efc54 100644
 --- a/drivers/media/platform/amd/isp4/isp4_subdev.c
 +++ b/drivers/media/platform/amd/isp4/isp4_subdev.c
-@@ -468,7 +468,7 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
+@@ -449,7 +449,7 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
  		return;
  	}
  
@@ -89,7 +92,7 @@ index fac16207727e..0fa646e37e8c 100644
  		ktime_get_ns(), stream_id, meta->poc,
  		meta->preview.enabled,
  		meta->preview.status);
-@@ -478,11 +478,13 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
+@@ -459,11 +459,13 @@ static void isp4sd_fw_resp_frame_done(struct isp4_subdev *isp_subdev,
  	     meta->preview.status == BUFFER_STATUS_DONE ||
  	     meta->preview.status == BUFFER_STATUS_DIRTY)) {
  		prev = isp4if_dequeue_buffer(ispif);
@@ -106,7 +109,7 @@ index fac16207727e..0fa646e37e8c 100644
  	} else if (meta->preview.enabled) {
  		dev_err(dev, "fail bad preview status %u\n",
  			meta->preview.status);
-@@ -821,6 +823,67 @@ static int isp4sd_start_stream(struct isp4_subdev *isp_subdev,
+@@ -794,6 +796,65 @@ static int isp4sd_start_stream(struct isp4_subdev *isp_subdev,
  	return ret;
  }
  
@@ -146,7 +149,6 @@ index fac16207727e..0fa646e37e8c 100644
 +		    ISP4SD_MIN_BUF_CNT_BEF_START_STREAM) {
 +			ret = isp4if_send_command(ispif, CMD_ID_START_STREAM,
 +						  NULL, 0);
-+
 +			if (ret) {
 +				dev_err(dev, "fail to START_STREAM");
 +				goto error_release_buf_node;
@@ -167,14 +169,13 @@ index fac16207727e..0fa646e37e8c 100644
 +
 +error_release_buf_node:
 +	isp4if_dealloc_buffer_node(buf_node);
-+
 +	return ret;
 +}
 +
  static int isp4sd_set_power(struct v4l2_subdev *sd, int on)
  {
  	struct isp4_subdev *isp_subdev = to_isp4_subdev(sd);
-@@ -920,6 +983,10 @@ static const struct media_entity_operations isp4sd_sdev_ent_ops = {
+@@ -892,6 +953,10 @@ static const struct media_entity_operations isp4sd_sdev_ent_ops = {
  	.link_validate = isp4sd_sdev_link_validate,
  };
  
@@ -185,7 +186,7 @@ index fac16207727e..0fa646e37e8c 100644
  int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
  		int irq[ISP4SD_MAX_FW_RESP_STREAM_NUM])
  {
-@@ -981,6 +1048,11 @@ int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
+@@ -952,6 +1017,11 @@ int isp4sd_init(struct isp4_subdev *isp_subdev, struct v4l2_device *v4l2_dev,
  	isp_subdev->host2fw_seq_num = 1;
  	ispif->status = ISP4IF_STATUS_PWR_OFF;
  
@@ -197,7 +198,7 @@ index fac16207727e..0fa646e37e8c 100644
  	return 0;
  
  err_subdev_unreg:
-@@ -995,6 +1067,7 @@ void isp4sd_deinit(struct isp4_subdev *isp_subdev)
+@@ -966,6 +1036,7 @@ void isp4sd_deinit(struct isp4_subdev *isp_subdev)
  {
  	struct isp4_interface *ispif = &isp_subdev->ispif;
  
@@ -206,7 +207,7 @@ index fac16207727e..0fa646e37e8c 100644
  	media_entity_cleanup(&isp_subdev->sdev.entity);
  	isp4if_deinit(ispif);
 diff --git a/drivers/media/platform/amd/isp4/isp4_subdev.h b/drivers/media/platform/amd/isp4/isp4_subdev.h
-index c6c6a20d2957..2d3844cf0152 100644
+index 70007b9de3f3..386e4e68f3fa 100644
 --- a/drivers/media/platform/amd/isp4/isp4_subdev.h
 +++ b/drivers/media/platform/amd/isp4/isp4_subdev.h
 @@ -17,6 +17,7 @@
@@ -227,10 +228,10 @@ index c6c6a20d2957..2d3844cf0152 100644
  
 diff --git a/drivers/media/platform/amd/isp4/isp4_video.c b/drivers/media/platform/amd/isp4/isp4_video.c
 new file mode 100644
-index 000000000000..467ee80f54e8
+index 000000000000..5006e5021155
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_video.c
-@@ -0,0 +1,1158 @@
+@@ -0,0 +1,1165 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright (C) 2025 Advanced Micro Devices, Inc.
@@ -383,6 +384,7 @@ index 000000000000..467ee80f54e8
 +			"fail for buf vaddr is null\n");
 +		return NULL;
 +	}
++
 +	return buf->vaddr;
 +}
 +
@@ -445,8 +447,8 @@ index 000000000000..467ee80f54e8
 +		dev_err(buf->dev, "vmap_unlocked fail");
 +		return -EFAULT;
 +	}
-+	buf->vaddr = map.vaddr;
 +
++	buf->vaddr = map.vaddr;
 +	mmap_buf = buf->dbuf->priv;
 +	buf->gpu_addr = mmap_buf->gpu_addr;
 +
@@ -484,6 +486,7 @@ index 000000000000..467ee80f54e8
 +		kfree(attach);
 +		return ret;
 +	}
++
 +	for_each_sgtable_sg(sgt, sg, i) {
 +		struct page *page = vmalloc_to_page(vaddr);
 +
@@ -492,6 +495,7 @@ index 000000000000..467ee80f54e8
 +			kfree(attach);
 +			return -ENOMEM;
 +		}
++
 +		sg_set_page(sg, page, PAGE_SIZE, 0);
 +		vaddr = ((char *)vaddr) + PAGE_SIZE;
 +	}
@@ -518,6 +522,7 @@ index 000000000000..467ee80f54e8
 +	/* release the scatterlist cache */
 +	if (attach->dma_dir != DMA_NONE)
 +		dma_unmap_sgtable(dbuf_attach->dev, sgt, attach->dma_dir, 0);
++
 +	sg_free_table(sgt);
 +	kfree(attach);
 +	dbuf_attach->priv = NULL;
@@ -976,6 +981,7 @@ index 000000000000..467ee80f54e8
 +	for (i = 0; i < ARRAY_SIZE(isp4vid_formats); i++)
 +		if (isp4vid_formats[i] == fival->pixel_format)
 +			break;
++
 +	if (i == ARRAY_SIZE(isp4vid_formats))
 +		return -EINVAL;
 +
@@ -983,6 +989,7 @@ index 000000000000..467ee80f54e8
 +		if (isp4vid_frmsize[i].width == fival->width &&
 +		    isp4vid_frmsize[i].height == fival->height)
 +			break;
++
 +	if (i == ARRAY_SIZE(isp4vid_frmsize))
 +		return -EINVAL;
 +
@@ -1230,6 +1237,7 @@ index 000000000000..467ee80f54e8
 +			ret);
 +		goto release_buffers;
 +	}
++
 +	isp_vdev->stream_started = true;
 +
 +	return 0;

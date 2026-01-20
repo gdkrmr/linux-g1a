@@ -2,4 +2,5 @@ src/
 pkg/
 linux-mainline/
 linux-g1a-*
+patches/
 *.pkg.tar.zst

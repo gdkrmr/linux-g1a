@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v6 1/7] media: platform: amd: Introduce amd isp4 capture
+Subject: [PATCH v7 1/7] media: platform: amd: Introduce amd isp4 capture
  driver
 From: Bin Du <Bin.Du@amd.com>
-Date: Fri, 28 Nov 2025 17:19:23 +0800
-Message-Id: <20251128091929.165272-2-Bin.Du@amd.com>
+Date: Tue, 16 Dec 2025 17:13:20 +0800
+Message-Id: <20251216091326.111977-2-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -21,6 +21,9 @@ Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Bin Du <Bin.Du@amd.com>
 Reviewed-by: Mario Limonciello (AMD) <superm1@kernel.org>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
+Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Kate Hsuan <hpa@redhat.com>
 ---
  MAINTAINERS                              |  13 +++
  drivers/media/platform/Kconfig           |   1 +
@@ -139,7 +142,7 @@ index 000000000000..de0092dad26f
 +amd_capture-objs := isp4.o
 diff --git a/drivers/media/platform/amd/isp4/isp4.c b/drivers/media/platform/amd/isp4/isp4.c
 new file mode 100644
-index 000000000000..e77713e4ea56
+index 000000000000..ad95e7f89189
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4.c
 @@ -0,0 +1,132 @@
@@ -253,9 +256,9 @@ index 000000000000..e77713e4ea56
 +	struct device *dev = &pdev->dev;
 +
 +	media_device_unregister(&isp_dev->mdev);
++	pm_runtime_disable(dev);
 +	v4l2_device_unregister(&isp_dev->v4l2_dev);
 +	media_device_cleanup(&isp_dev->mdev);
-+	pm_runtime_disable(dev);
 +}
 +
 +static struct platform_driver isp4_capture_drv = {

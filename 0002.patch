@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v6 2/7] media: platform: amd: low level support for isp4
+Subject: [PATCH v7 2/7] media: platform: amd: low level support for isp4
  firmware
 From: Bin Du <Bin.Du@amd.com>
-Date: Fri, 28 Nov 2025 17:19:24 +0800
-Message-Id: <20251128091929.165272-3-Bin.Du@amd.com>
+Date: Tue, 16 Dec 2025 17:13:21 +0800
+Message-Id: <20251216091326.111977-3-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -18,7 +18,9 @@ Co-developed-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Svetoslav Stoilov <Svetoslav.Stoilov@amd.com>
 Signed-off-by: Bin Du <Bin.Du@amd.com>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
-Signed-off-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
+Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Kate Hsuan <hpa@redhat.com>
 ---
  MAINTAINERS                                   |   1 +
  drivers/media/platform/amd/isp4/isp4_hw_reg.h | 124 ++++++++++++++++++
