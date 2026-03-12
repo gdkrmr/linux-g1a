@@ -6,10 +6,10 @@
 
 #pkgbase=linux-mainline
 pkgbase=linux-g1a       # Build kernel with a different name
-_tag=v6.19-rc6
-pkgver=6.19.rc6
+_tag=v7.0-rc3
+pkgver=7.0.rc3
 pkgrel=2
-pkgdesc="Linux Mainline"
+pkgdesc="Linux Mainline for ZBook Ultra G1a"
 arch=(x86_64)
 url="https://kernel.org/"
 license=(GPL-2.0-only)
@@ -50,21 +50,23 @@ source=(
   "0005.patch"
   "0006.patch"
   "0007.patch"
+  "0008.patch"
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
 )
-sha256sums=('c38c66dfed23cbc5d8b1900abffcaf1d4f83aeb09a7b474775a6df6eb2c487f9'
+sha256sums=('e92b5fc2ef7632846e0c5a8045d56f3ef074ef67aff1359955fab1cd3231e3be'
             'f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072'
-            '7acd44850887700a84493f86c4301a1123c45ef564692623a7a5815f57ca59bd'
-            '0ab26f6ba28cd92a824765e909917a235e5de12196aef0e1a5e31420776583ee'
-            '25960e16e903ff2fa8220e7a5b4b39dca5bd4dfc075d042811a129aa406b56cb'
-            '50e6b57296102c959dfaf6bdf9afe7ffbde3ddf89634f66227a7c94912c32d3d'
-            '6f190970ee63e188b59ee6b20a40720b6cf7f46c4375bfa39cd7b030dcc361f0'
-            '18b8aa938c05e53f8f2d9bbc9efc884eafd75429dcdce9301a4de27e54c8f033'
-            '73ab5ddc6b4c079ce47466de981a021d28d2cb2734f4eb05697f011af9e4259e')
+            'eba4cbc6027857f7e0f5c74de28ee65accc08a089827eca5a1cd617a31bc720d'
+            'ac5791ad90ef961671fd07e103acd52e2c47a420d4c70c447e21e6d4c21120ab'
+            '5a3559b98c7d83f3c6bbe13ee407119d370b356bda1402ccb8002d5f629bf3b4'
+            '1a69b9aa8376df8cd082339469d2436da80bd0cd64d6e46a1da14ad730c2e73a'
+            '19f6b1f002019f4a0932f27041318cf21377b231f264bcf4484c624864277e4d'
+            'b1ffec13e1441b6e4e826c0142bef09ef76ac2a9ca1bed7f93af809d3f15d61b'
+            '6a66b0e06ea6e3c71cfffb3dd9ce2e88d89789f1c72a9213d6f1d29442e42e01'
+            'fc5721233854cfb14b03ad9d77310f955226c6daa446e1e0a9184fba5080e0d8')
 
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase

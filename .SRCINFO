@@ -1,7 +1,7 @@
 pkgbase = linux-g1a
-	pkgdesc = Linux Mainline
-	pkgver = 6.19.rc6
-	pkgrel = 1
+	pkgdesc = Linux Mainline for ZBook Ultra G1a
+	pkgver = 7.0.rc1
+	pkgrel = 2
 	url = https://kernel.org/
 	arch = x86_64
 	license = GPL-2.0-only
@@ -25,7 +25,7 @@ pkgbase = linux-g1a
 	makedepends = texlive-latexextra
 	options = !debug
 	options = !strip
-	source = linux-mainline::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=v6.19-rc6
+	source = linux-mainline::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=v7.0-rc1
 	source = config
 	source = 0001.patch
 	source = 0002.patch
@@ -34,21 +34,23 @@ pkgbase = linux-g1a
 	source = 0005.patch
 	source = 0006.patch
 	source = 0007.patch
+	source = 0008.patch
 	validpgpkeys = ABAF11C65A2970B130ABE3C479BE3E4300411886
 	validpgpkeys = 647F28654894E3BD457199BE38DBBDC86092693E
 	validpgpkeys = 83BC8889351B5DEBBB68416EB8AC08600F108CDF
-	sha256sums = c38c66dfed23cbc5d8b1900abffcaf1d4f83aeb09a7b474775a6df6eb2c487f9
+	sha256sums = c6bb082134faf03dc3fcd93164cac54a6092cfa7fb5ebe4611559d254c69624b
 	sha256sums = f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072
-	sha256sums = 7acd44850887700a84493f86c4301a1123c45ef564692623a7a5815f57ca59bd
-	sha256sums = 0ab26f6ba28cd92a824765e909917a235e5de12196aef0e1a5e31420776583ee
-	sha256sums = 25960e16e903ff2fa8220e7a5b4b39dca5bd4dfc075d042811a129aa406b56cb
-	sha256sums = 50e6b57296102c959dfaf6bdf9afe7ffbde3ddf89634f66227a7c94912c32d3d
-	sha256sums = 6f190970ee63e188b59ee6b20a40720b6cf7f46c4375bfa39cd7b030dcc361f0
-	sha256sums = 18b8aa938c05e53f8f2d9bbc9efc884eafd75429dcdce9301a4de27e54c8f033
-	sha256sums = 73ab5ddc6b4c079ce47466de981a021d28d2cb2734f4eb05697f011af9e4259e
+	sha256sums = eba4cbc6027857f7e0f5c74de28ee65accc08a089827eca5a1cd617a31bc720d
+	sha256sums = ac5791ad90ef961671fd07e103acd52e2c47a420d4c70c447e21e6d4c21120ab
+	sha256sums = 5a3559b98c7d83f3c6bbe13ee407119d370b356bda1402ccb8002d5f629bf3b4
+	sha256sums = 1a69b9aa8376df8cd082339469d2436da80bd0cd64d6e46a1da14ad730c2e73a
+	sha256sums = 19f6b1f002019f4a0932f27041318cf21377b231f264bcf4484c624864277e4d
+	sha256sums = b1ffec13e1441b6e4e826c0142bef09ef76ac2a9ca1bed7f93af809d3f15d61b
+	sha256sums = 6a66b0e06ea6e3c71cfffb3dd9ce2e88d89789f1c72a9213d6f1d29442e42e01
+	sha256sums = fc5721233854cfb14b03ad9d77310f955226c6daa446e1e0a9184fba5080e0d8
 
 pkgname = linux-g1a
-	pkgdesc = The Linux Mainline kernel and modules
+	pkgdesc = The Linux Mainline for ZBook Ultra G1a kernel and modules
 	depends = coreutils
 	depends = initramfs
 	depends = kmod
@@ -63,8 +65,8 @@ pkgname = linux-g1a
 	replaces = wireguard-arch
 
 pkgname = linux-g1a-headers
-	pkgdesc = Headers and scripts for building modules for the Linux Mainline kernel
+	pkgdesc = Headers and scripts for building modules for the Linux Mainline for ZBook Ultra G1a kernel
 	depends = pahole
 
 pkgname = linux-g1a-docs
-	pkgdesc = Documentation for the Linux Mainline kernel
+	pkgdesc = Documentation for the Linux Mainline for ZBook Ultra G1a kernel
