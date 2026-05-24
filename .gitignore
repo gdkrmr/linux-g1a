@@ -4,3 +4,4 @@ linux-mainline/
 linux-g1a-*
 patches/
 *.pkg.tar.zst
+/linux-stable/
