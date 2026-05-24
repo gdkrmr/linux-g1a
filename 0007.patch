@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v9 7/7] Documentation: add documentation of AMD isp 4
+Subject: [PATCH v11 7/7] Documentation: add documentation of AMD isp 4
  driver
 From: Bin Du <Bin.Du@amd.com>
-Date: Mon, 02 Mar 2026 15:30:20 +0800
-Message-Id: <20260302073020.148277-8-Bin.Du@amd.com>
+Date: Wed, 06 May 2026 17:32:49 +0800
+Message-Id: <20260506093250.93460-8-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -17,6 +17,7 @@ Reviewed-by: Mario Limonciello (AMD) <superm1@kernel.org>
 Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
 Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Sultan Alsawaf <sultan@kerneltoast.com>
 ---
  Documentation/admin-guide/media/amdisp4-1.rst | 63 +++++++++++++++++++
  Documentation/admin-guide/media/amdisp4.dot   |  6 ++
@@ -108,7 +109,7 @@ index 000000000000..978f30c1a31a
 +	n00000003 [label="Preview\n/dev/video0", shape=box, style=filled, fillcolor=yellow]
 +}
 diff --git a/Documentation/admin-guide/media/v4l-drivers.rst b/Documentation/admin-guide/media/v4l-drivers.rst
-index 3bac5165b134..6027416e5373 100644
+index 393f83e8dc4d..0fb88449fffd 100644
 --- a/Documentation/admin-guide/media/v4l-drivers.rst
 +++ b/Documentation/admin-guide/media/v4l-drivers.rst
 @@ -9,6 +9,7 @@ Video4Linux (V4L) driver-specific documentation
@@ -120,10 +121,10 @@ index 3bac5165b134..6027416e5373 100644
  	c3-isp
  	cafe_ccic
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 8478789ac265..c34137e27b55 100644
+index ec0a4d49f4d8..080c7cfcaf46 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -1139,6 +1139,8 @@ M:	Nirujogi Pratap <pratap.nirujogi@amd.com>
+@@ -1168,6 +1168,8 @@ M:	Nirujogi Pratap <pratap.nirujogi@amd.com>
  L:	linux-media@vger.kernel.org
  S:	Maintained
  T:	git git://linuxtv.org/media.git
@@ -133,5 +134,5 @@ index 8478789ac265..c34137e27b55 100644
  F:	drivers/media/platform/amd/Makefile
  F:	drivers/media/platform/amd/isp4/Kconfig
 -- 
-2.34.1
+2.54.0
 

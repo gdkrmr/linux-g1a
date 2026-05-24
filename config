@@ -2,6 +2,8 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 6.16.0-arch1 Kernel Configuration
 #
+
+CONFIG_VIDEO_AMD_ISP4_CAPTURE=m
 CONFIG_CC_VERSION_TEXT="gcc (GCC) 15.1.1 20250729"
 CONFIG_CC_IS_GCC=y
 CONFIG_GCC_VERSION=150101

@@ -6,10 +6,10 @@
 
 #pkgbase=linux-mainline
 pkgbase=linux-g1a       # Build kernel with a different name
-_tag=v7.0-rc3
-pkgver=7.0.rc3
-pkgrel=2
-pkgdesc="Linux Mainline for ZBook Ultra G1a"
+_tag=v7.0.10
+pkgver=7.0.10
+pkgrel=3
+pkgdesc="Linux Stable for ZBook Ultra G1a"
 arch=(x86_64)
 url="https://kernel.org/"
 license=(GPL-2.0-only)
@@ -39,9 +39,9 @@ options=(
   !debug
   !strip
 )
-_srcname=linux-mainline
+_srcname=linux-stable
 source=(
-  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=$_tag"
+  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git#tag=$_tag"
   config         # the main kernel config file
   "0001.patch"
   "0002.patch"
@@ -50,23 +50,21 @@ source=(
   "0005.patch"
   "0006.patch"
   "0007.patch"
-  "0008.patch"
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
 )
-sha256sums=('e92b5fc2ef7632846e0c5a8045d56f3ef074ef67aff1359955fab1cd3231e3be'
-            'f14265abd06e1ca3baddbcc45b373a2f772d43120af7208b2f0283f8e6f04072'
-            'eba4cbc6027857f7e0f5c74de28ee65accc08a089827eca5a1cd617a31bc720d'
-            'ac5791ad90ef961671fd07e103acd52e2c47a420d4c70c447e21e6d4c21120ab'
-            '5a3559b98c7d83f3c6bbe13ee407119d370b356bda1402ccb8002d5f629bf3b4'
-            '1a69b9aa8376df8cd082339469d2436da80bd0cd64d6e46a1da14ad730c2e73a'
-            '19f6b1f002019f4a0932f27041318cf21377b231f264bcf4484c624864277e4d'
-            'b1ffec13e1441b6e4e826c0142bef09ef76ac2a9ca1bed7f93af809d3f15d61b'
-            '6a66b0e06ea6e3c71cfffb3dd9ce2e88d89789f1c72a9213d6f1d29442e42e01'
-            'fc5721233854cfb14b03ad9d77310f955226c6daa446e1e0a9184fba5080e0d8')
+sha256sums=('09765c1e94085f105c99f80a68bf237da572bb8781ad3b139c69878053e94f66'
+            '84e97b0d312d5e0f24075b20cc387b6964a7df7f61574c12add4f9d08f8a737e'
+            'a00439895ea81ca6c6271dc89eb25d49e2845348508c38c6c4c0ae61df0f1aaf'
+            'c16bd61e97b39324b12001567633f22319213496dd18dd312deef44ff977d133'
+            '2ad4cba30ea65ef5ea2719a08c9926a32deea831882bd05379f35f99efa9d98f'
+            '8fafbef6ae6e0624ab1430a5710ab90a26fabcccebb84599d17ddb609a48e301'
+            'f8e62a4295f8eec3534a0e93af3c05b0c114dafa57f68b98f4dd84f408548dde'
+            '18257bbeb119d45d3ea21a7fec882553a1f8a0b57be62f01872a9c3fd8464e84'
+            'f8949f95b9b6ffb22391857b1a009a123a94a14bd2b4cbba7255e19131d9be51')
 
 export KBUILD_BUILD_HOST=archlinux
 export KBUILD_BUILD_USER=$pkgbase

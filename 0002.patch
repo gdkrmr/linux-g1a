@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v9 2/7] media: platform: amd: low level support for isp4
+Subject: [PATCH v11 2/7] media: platform: amd: low level support for isp4
  firmware
 From: Bin Du <Bin.Du@amd.com>
-Date: Mon, 02 Mar 2026 15:30:15 +0800
-Message-Id: <20260302073020.148277-3-Bin.Du@amd.com>
+Date: Wed, 06 May 2026 17:32:44 +0800
+Message-Id: <20260506093250.93460-3-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -20,6 +20,7 @@ Signed-off-by: Bin Du <Bin.Du@amd.com>
 Reviewed-by: Sultan Alsawaf <sultan@kerneltoast.com>
 Tested-by: Alexey Zagorodnikov <xglooom@gmail.com>
 Tested-by: Kate Hsuan <hpa@redhat.com>
+Signed-off-by: Sultan Alsawaf <sultan@kerneltoast.com>
 ---
  MAINTAINERS                                   |   1 +
  drivers/media/platform/amd/isp4/isp4_hw_reg.h | 124 ++++++++++++++++++
@@ -27,10 +28,10 @@ Tested-by: Kate Hsuan <hpa@redhat.com>
  create mode 100644 drivers/media/platform/amd/isp4/isp4_hw_reg.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 3640a1e3262c..7aa17c7e71d6 100644
+index e5b39120e7d0..e7bb6dda6072 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -1145,6 +1145,7 @@ F:	drivers/media/platform/amd/isp4/Kconfig
+@@ -1174,6 +1174,7 @@ F:	drivers/media/platform/amd/isp4/Kconfig
  F:	drivers/media/platform/amd/isp4/Makefile
  F:	drivers/media/platform/amd/isp4/isp4.c
  F:	drivers/media/platform/amd/isp4/isp4.h
@@ -169,5 +170,5 @@ index 000000000000..09c76f75c5ee
 +
 +#endif /* _ISP4_HW_REG_H_ */
 -- 
-2.34.1
+2.54.0
 

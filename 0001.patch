@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v9 1/7] media: platform: amd: Introduce amd isp4 capture
+Subject: [PATCH v11 1/7] media: platform: amd: Introduce amd isp4 capture
  driver
 From: Bin Du <Bin.Du@amd.com>
-Date: Mon, 02 Mar 2026 15:30:14 +0800
-Message-Id: <20260302073020.148277-2-Bin.Du@amd.com>
+Date: Wed, 06 May 2026 17:32:43 +0800
+Message-Id: <20260506093250.93460-2-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -42,10 +42,10 @@ Tested-by: Kate Hsuan <hpa@redhat.com>
  create mode 100644 drivers/media/platform/amd/isp4/isp4.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index cd7ff55b5d32..3640a1e3262c 100644
+index 61bf550fd37c..e5b39120e7d0 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -1133,6 +1133,19 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/iommu/linux.git
+@@ -1162,6 +1162,19 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/iommu/linux.git
  F:	drivers/iommu/amd/
  F:	include/linux/amd-iommu.h
  
@@ -66,7 +66,7 @@ index cd7ff55b5d32..3640a1e3262c 100644
  M:	Felix Kuehling <Felix.Kuehling@amd.com>
  L:	amd-gfx@lists.freedesktop.org
 diff --git a/drivers/media/platform/Kconfig b/drivers/media/platform/Kconfig
-index 9287faafdce5..772c70665510 100644
+index 3f0b7bb68cc9..0b33e927bd59 100644
 --- a/drivers/media/platform/Kconfig
 +++ b/drivers/media/platform/Kconfig
 @@ -63,6 +63,7 @@ config VIDEO_MUX
@@ -76,9 +76,9 @@ index 9287faafdce5..772c70665510 100644
 +source "drivers/media/platform/amd/Kconfig"
  source "drivers/media/platform/amlogic/Kconfig"
  source "drivers/media/platform/amphion/Kconfig"
- source "drivers/media/platform/aspeed/Kconfig"
+ source "drivers/media/platform/arm/Kconfig"
 diff --git a/drivers/media/platform/Makefile b/drivers/media/platform/Makefile
-index 6fd7db0541c7..b207bd8d8022 100644
+index 6d5f79ddfcc3..16c185752474 100644
 --- a/drivers/media/platform/Makefile
 +++ b/drivers/media/platform/Makefile
 @@ -6,6 +6,7 @@
@@ -88,7 +88,7 @@ index 6fd7db0541c7..b207bd8d8022 100644
 +obj-y += amd/
  obj-y += amlogic/
  obj-y += amphion/
- obj-y += aspeed/
+ obj-y += arm/
 diff --git a/drivers/media/platform/amd/Kconfig b/drivers/media/platform/amd/Kconfig
 new file mode 100644
 index 000000000000..25af49f246b2
@@ -297,5 +297,5 @@ index 000000000000..7f2db0dfa2d9
 +
 +#endif /* _ISP4_H_ */
 -- 
-2.34.1
+2.54.0
 

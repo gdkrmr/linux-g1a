@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v9 5/7] media: platform: amd: isp4 video node and buffers
+Subject: [PATCH v11 5/7] media: platform: amd: isp4 video node and buffers
  handling added
 From: Bin Du <Bin.Du@amd.com>
-Date: Mon, 02 Mar 2026 15:30:18 +0800
-Message-Id: <20260302073020.148277-6-Bin.Du@amd.com>
+Date: Wed, 06 May 2026 17:32:47 +0800
+Message-Id: <20260506093250.93460-6-Bin.Du@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -34,10 +34,10 @@ Tested-by: Kate Hsuan <hpa@redhat.com>
  create mode 100644 drivers/media/platform/amd/isp4/isp4_video.h
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 48ffc8bbdcee..80c966fde0b4 100644
+index 6dfc9f894764..a67dfb050df9 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -1151,6 +1151,8 @@ F:	drivers/media/platform/amd/isp4/isp4_interface.c
+@@ -1180,6 +1180,8 @@ F:	drivers/media/platform/amd/isp4/isp4_interface.c
  F:	drivers/media/platform/amd/isp4/isp4_interface.h
  F:	drivers/media/platform/amd/isp4/isp4_subdev.c
  F:	drivers/media/platform/amd/isp4/isp4_subdev.h
@@ -142,7 +142,7 @@ index ceade9fec5d9..ddf6bdf4a62a 100644
  
 diff --git a/drivers/media/platform/amd/isp4/isp4_video.c b/drivers/media/platform/amd/isp4/isp4_video.c
 new file mode 100644
-index 000000000000..91a984c22f32
+index 000000000000..0cebb39f98e1
 --- /dev/null
 +++ b/drivers/media/platform/amd/isp4/isp4_video.c
 @@ -0,0 +1,797 @@
@@ -161,7 +161,7 @@ index 000000000000..91a984c22f32
 +
 +#define ISP4VID_ISP_DRV_NAME "amd_isp_capture"
 +#define ISP4VID_MAX_PREVIEW_FPS 30
-+#define ISP4VID_DEFAULT_FMT isp4vid_formats[0]
++#define ISP4VID_DEFAULT_FMT V4L2_PIX_FMT_NV12
 +
 +#define ISP4VID_PAD_VIDEO_OUTPUT 0
 +
@@ -1007,5 +1007,5 @@ index 000000000000..c66451e26166
 +
 +#endif /* _ISP4_VIDEO_H_ */
 -- 
-2.34.1
+2.54.0
 
